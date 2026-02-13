@@ -1,0 +1,6 @@
+{"question": "量子计算和传统计算机的主要区别是什么？各自有什么优势？", "answer": "量子比特, 叠加态, 并行计算, 量子纠缠", "num_hops": 2, "difficulty": "medium", "requires_search": true, "search_chain": [{"query": "量子计算原理 量子比特", "purpose": "了解量子计算基本原理"}, {"query": "量子计算 vs 传统计算机 优势对比", "purpose": "对比两者优劣势"}]}
+{"question": "2024年诺贝尔物理学奖授予了谁？他们的研究贡献是什么？", "answer": "机器学习, 人工神经网络, John Hopfield, Geoffrey Hinton", "num_hops": 2, "difficulty": "medium", "requires_search": true, "search_chain": [{"query": "2024年诺贝尔物理学奖获得者", "purpose": "查找获奖者信息"}, {"query": "Hopfield Hinton 神经网络 研究贡献", "purpose": "了解具体研究内容"}]}
+{"question": "中国的长城总共有多长？它的主要建造朝代有哪些？", "answer": "万里长城, 21196公里, 秦朝, 明朝, 汉朝", "num_hops": 2, "difficulty": "easy", "requires_search": true, "search_chain": [{"query": "长城总长度", "purpose": "查询长城长度"}, {"query": "长城建造历史 主要朝代", "purpose": "了解建造朝代"}]}
+{"question": "SpaceX的星舰（Starship）最新一次试飞情况如何？有什么技术突破？", "answer": "星舰, Starship, 试飞, 回收, 助推器", "num_hops": 2, "difficulty": "hard", "requires_search": true, "search_chain": [{"query": "SpaceX Starship 最新试飞 2024", "purpose": "查找最新试飞信息"}, {"query": "星舰技术突破 助推器回收", "purpose": "了解技术细节"}]}
+{"question": "Python编程语言是谁发明的？它的设计哲学是什么？", "answer": "Guido van Rossum, 简洁, 可读性, 优雅", "num_hops": 1, "difficulty": "easy", "requires_search": true, "search_chain": [{"query": "Python编程语言发明者 设计哲学", "purpose": "查找Python创始人和设计理念"}]}
+

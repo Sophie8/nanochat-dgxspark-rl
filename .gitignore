@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+
+# Training outputs
+outputs/
+checkpoints/
+*.pt
+*.bin
+*.safetensors
+
+# Logs
+logs/
+*.log
+swanlog/
+wandb/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (keep demo files)
+data/*.jsonl
+!data/gsm8k_mini_test.jsonl
+!data/search_r1_demo.jsonl
+!data/sft_demo.jsonl
+

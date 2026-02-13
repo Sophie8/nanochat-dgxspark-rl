@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nanochat-dgxspark-rl"
+version = "0.1.0"
+description = "A minimal RL training framework for LLMs on NVIDIA DGX Spark -- SFT, GRPO, and Search-R1 with single/dual-node DDP support."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "nanochat-dgxspark-rl Contributors"},
+]
+keywords = ["LLM", "GRPO", "reinforcement-learning", "LoRA", "search-r1", "DGX-Spark", "distributed-training"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch>=2.1.0",
+    "transformers>=4.40.0",
+    "peft>=0.11.0",
+    "accelerate>=0.30.0",
+    "filelock>=3.12.0",
+    "duckduckgo-search>=6.0.0",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+logging = ["swanlab>=0.3.0"]
+all = [
+    "swanlab>=0.3.0",
+    "datasets>=2.14.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/nanochat-dgxspark-rl"
+
+[tool.setuptools.packages.find]
+include = ["nanochat*", "tools*", "tasks*", "scripts*"]

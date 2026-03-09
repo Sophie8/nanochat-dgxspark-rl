@@ -122,6 +122,22 @@ ptdtype = torch.float32 if args.dtype == 'float32' else torch.bfloat16
 autocast_ctx = torch.amp.autocast(device_type=device_type, dtype=ptdtype) if device_type == "cuda" else nullcontext()
 synchronize = torch.cuda.synchronize if device_type == "cuda" else lambda: None
 get_max_memory = torch.cuda.max_memory_allocated if device_type == "cuda" else lambda: 0
+# Print compute initialization info
+print0("=" * 80)
+print0("Compute Initialization")
+print0("=" * 80)
+print0(f"Device type: {device_type}")
+print0(f"Device: {device}")
+print0(f"DDP enabled: {ddp}")
+if ddp:
+    print0(f"DDP rank: {ddp_rank}/{ddp_world_size}")
+    print0(f"DDP local rank: {ddp_local_rank}")
+print0(f"Master process: {master_process}")
+print0(f"Precision setup: {ptdtype}")
+print0(f"Autocast enabled: {device_type == 'cuda'}")
+print0(f"CUDA synchronization: {device_type == 'cuda'}")
+print0(f"Memory tracking: {device_type == 'cuda'}")
+print0("=" * 80)
 
 # SwanLab logging
 if master_process and args.run != "dummy":
@@ -567,6 +583,7 @@ batch_iterator = get_batch()
 total_training_time = 0
 smooth_reward = 0
 ema_beta = 0.9
+debiased_reward = 0.0
 
 for step in range(num_steps):
     

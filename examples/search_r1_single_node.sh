@@ -15,9 +15,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MODEL_PATH="${MODEL_PATH:-Qwen/Qwen3-8B}"
-TRAIN_DATA="${TRAIN_DATA:-data/search_r1_train.jsonl}"
-VAL_DATA="${VAL_DATA:-data/search_r1_val.jsonl}"
+MODEL_PATH="${MODEL_PATH:-/home/shuyi/Documents/Qwen3-8b}"
+TRAIN_DATA="${TRAIN_DATA:-data/search_r1_multiturn_train.jsonl}"
+VAL_DATA="${VAL_DATA:-data/search_r1_multiturn_val.jsonl}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/search_r1}"
 SEARCH_ENGINE="${SEARCH_ENGINE:-duckduckgo}"
 SEARCH_PROXY="${SEARCH_PROXY:-}"
@@ -26,6 +26,7 @@ EXAMPLES_PER_STEP="${EXAMPLES_PER_STEP:-4}"
 NUM_GENERATIONS="${NUM_GENERATIONS:-4}"
 MAX_SEARCH_TURNS="${MAX_SEARCH_TURNS:-5}"
 MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-768}"
+DEVICE_BATCH_SIZE="${DEVICE_BATCH_SIZE:-128}"
 
 echo "============================================"
 echo " nanochat-dgxspark-rl — Search-R1 GRPO"
@@ -59,8 +60,8 @@ python scripts/search_r1_grpo.py \
     --num-generations ${NUM_GENERATIONS} \
     --max-search-turns ${MAX_SEARCH_TURNS} \
     --max-new-tokens ${MAX_NEW_TOKENS} \
-    --swanlab-mode cloud \
-    --swanlab-project nanochat-rl-search-r1
+    --device-batch-size ${DEVICE_BATCH_SIZE} \
+    --run "search-r1-grpo"
 
 echo "Search-R1 training complete! Model saved to ${OUTPUT_DIR}"
 

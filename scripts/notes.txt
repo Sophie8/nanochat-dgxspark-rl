@@ -1,0 +1,4 @@
+uvx hf download Qwen/Qwen3-8B --local-dir /home/shuyi/Documents/models
+https://github.com/databrickslabs/dolly/issues/118: use full path for model, not ~ at the begining
+https://forums.developer.nvidia.com/t/effective-pytorch-and-cuda/348230/3
+

@@ -88,11 +88,17 @@ def main():
 	# ensure tokenizer and model vocab sizes match
 	model.sync_vocab_size(tokenizer.get_vocab_size())
 
+	# if a proxy was provided, export it so SearchToolkit/DuckDuckGoSearch
+	# can pick it up via environment variable (the toolkit itself does not
+	# accept a proxy argument).
+	if args.search_proxy:
+		os.environ["SEARCH_PROXY"] = args.search_proxy
+		print(f"Using search proxy: {args.search_proxy}")
+
 	# Initialize search task for multi-turn generation
 	train_task = SearchR1Task(
 		data_path=None,
 		search_engine=args.search_engine,
-		search_proxy=args.search_proxy,
 	)
 
 	@torch.no_grad()

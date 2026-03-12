@@ -95,11 +95,14 @@ def main():
 		os.environ["SEARCH_PROXY"] = args.search_proxy
 		print(f"Using search proxy: {args.search_proxy}")
 
-	# Initialize search task for multi-turn generation
-	train_task = SearchR1Task(
-		data_path=None,
-		search_engine=args.search_engine,
-	)
+	# create a search toolkit directly (no need to load examples)
+	from tools.search_tools import SearchToolkit, execute_search_tool
+
+	search_toolkit = SearchToolkit(preferred_engines=[args.search_engine, "mock"])
+
+	def exec_search(query: str) -> str:
+		call = {"name": "web_search", "arguments": {"query": query.strip()}}
+		return execute_search_tool(search_toolkit, call)
 
 	@torch.no_grad()
 	def generate_multiturn_text(prompt: str) -> str:
@@ -162,7 +165,7 @@ def main():
 				
 				# Execute search and inject results
 				for query in queries:
-					search_result = train_task.execute_search(query)
+					search_result = exec_search(query)
 					info_text = f"\n{INFO_TAG_START}{search_result}{INFO_TAG_END}\n"
 					info_ids = tokenizer.encode(info_text)
 					

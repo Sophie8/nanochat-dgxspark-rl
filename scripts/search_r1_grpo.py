@@ -516,8 +516,13 @@ def get_batch():
 # Evaluation
 # ===============================================================================
 @torch.no_grad()
-def run_eval(num_examples=50):
-    """评估（使用多轮 rollout）"""
+def run_eval(num_examples=50, log_interval=10):
+    """评估（使用多轮 rollout）
+    
+    Args:
+        num_examples: number of examples to evaluate
+        log_interval: log detailed results every N examples
+    """
     model.eval()
     total_reward = 0.0
     total_correct = 0
@@ -542,6 +547,15 @@ def run_eval(num_examples=50):
         total_reward += reward
         total_correct += is_correct
         num_evaluated += 1
+        
+        # Log detailed results at intervals
+        if master_process and num_evaluated % log_interval == 0:
+            # Truncate comp_text for readability
+            comp_text_short = comp_text[:150].replace('\n', ' ')
+            if len(comp_text) > 150:
+                comp_text_short += "..."
+            print0(f"  [Eval {num_evaluated}] Reward: {reward:.2f} | Correct: {is_correct} | "
+                   f"Resp: {comp_text_short}")
     
     # Aggregate
     reward_tensor = torch.tensor(total_reward, dtype=torch.float, device=device)

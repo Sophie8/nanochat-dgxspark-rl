@@ -122,6 +122,18 @@ ptdtype = torch.float32 if args.dtype == 'float32' else torch.bfloat16
 autocast_ctx = torch.amp.autocast(device_type=device_type, dtype=ptdtype) if device_type == "cuda" else nullcontext()
 synchronize = torch.cuda.synchronize if device_type == "cuda" else lambda: None
 get_max_memory = torch.cuda.max_memory_allocated if device_type == "cuda" else lambda: 0
+
+# SwanLab logging
+if master_process and args.run != "dummy":
+    swanlab.init(
+        project="nanochat-search-r1",
+        experiment_name=args.run,
+        config=user_config,
+    )
+    use_swanlab = True
+else:
+    use_swanlab = False
+
 # Print compute initialization info
 print0("=" * 80)
 print0("Compute Initialization")
@@ -138,17 +150,6 @@ print0(f"Autocast enabled: {device_type == 'cuda'}")
 print0(f"CUDA synchronization: {device_type == 'cuda'}")
 print0(f"Memory tracking: {device_type == 'cuda'}")
 print0("=" * 80)
-
-# SwanLab logging
-if master_process and args.run != "dummy":
-    swanlab.init(
-        project="nanochat-search-r1",
-        experiment_name=args.run,
-        config=user_config,
-    )
-    use_swanlab = True
-else:
-    use_swanlab = False
 
 # ===============================================================================
 # Load tokenizer + model with LoRA

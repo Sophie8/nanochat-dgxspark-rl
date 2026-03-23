@@ -35,7 +35,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from nanochat.hf_tokenizer_wrapper import HFTokenizerWrapper
 from nanochat.hf_model_wrapper import HFModelWrapper
 from tasks.search_r1 import SearchR1Task
-from scripts.search_r1_grpo import prepare_prompt  # Import prepare_prompt from search_r1_grpo
+#from scripts.search_r1_grpo import prepare_prompt  # Import prepare_prompt from search_r1_grpo
 
 
 def parse_args():
@@ -59,6 +59,48 @@ def parse_args():
 						help="HTTP proxy for search engine")
 	return parser.parse_args()
 
+# ===============================================================================
+# System prompt with tool definitions
+# ===============================================================================
+SYSTEM_PROMPT_WITH_TOOLS = """\
+你是一个有用的AI助手，可以使用网络搜索工具来获取信息并进行多步推理。
+
+可用工具：
+- web_search：搜索网络获取最新信息
+
+回答问题时，请遵循以下流程：
+1. 在 <think>...</think> 标签中进行推理思考
+2. 需要搜索时，使用 <search>你的搜索查询</search> 标签
+3. 搜索结果会以 <information>...</information> 标签返回给你
+4. 根据搜索结果继续推理，如果信息不够可以再次搜索
+5. 最终在推理完成后直接给出答案
+
+示例格式：
+<think>我需要先了解X，然后再查Y</think>
+<search>X相关查询</search>
+<information>搜索结果...</information>
+<think>根据搜索结果，我了解到...但还需要进一步了解Y</think>
+<search>Y相关查询</search>
+<information>搜索结果...</information>
+<think>综合以上信息，我可以得出结论</think>
+最终答案"""
+
+def prepare_prompt(item, tokenizer):
+    """准备prompt（添加system和工具定义）"""
+    messages = item["messages"].copy()
+    
+    # 替换 system prompt
+    if messages and messages[0]["role"] == "system":
+        messages[0]["content"] = SYSTEM_PROMPT_WITH_TOOLS
+    else:
+        messages.insert(0, {"role": "system", "content": SYSTEM_PROMPT_WITH_TOOLS})
+    
+    # 使用 HF chat template
+    prompt_text = tokenizer.hf_tokenizer.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
+    prompt_ids = tokenizer.hf_tokenizer.encode(prompt_text, add_special_tokens=False)
+    return prompt_ids
 
 def main():
 	args = parse_args()
@@ -106,12 +148,12 @@ def main():
 		return execute_search_tool(search_toolkit, call)
 
 	@torch.no_grad()
-	def generate_multiturn_text(prompt: str) -> str:
+	def generate_multiturn_text(prompt: str, tokenizer) -> str:
 		"""Generate text with multi-turn search capability (like Search-R1)."""
 		# Prepare prompt tokens using the imported prepare_prompt function from search_r1_grpo
 		# prepare_prompt expects an item dict with "messages" key
 		item = {"messages": [{"role": "user", "content": prompt}]}
-		prompt_ids = prepare_prompt(item)
+		prompt_ids = prepare_prompt(item, tokenizer)
 		
 		# Constants from search_r1_grpo.py
 		MAX_SEARCH_TURNS = args.max_search_turns
@@ -196,9 +238,9 @@ def main():
 		full_text = tokenizer.decode(all_new_ids)
 		return full_text
 
-	def generate_text(prompt: str) -> str:
+	def generate_text(prompt: str, tokenizer) -> str:
 		"""Wrapper to generate text using multi-turn capability."""
-		return generate_multiturn_text(prompt)
+		return generate_multiturn_text(prompt, tokenizer)
 
 	# always interactive: load the model once then loop until ctrl+c
 	print(f"Loaded model from {args.model_path} on {device}")
@@ -211,7 +253,7 @@ def main():
 				break
 			if not q.strip():
 				continue
-			print(generate_text(q))
+			print(generate_text(q, tokenizer))
 	except KeyboardInterrupt:
 		print("\nExiting.")
 

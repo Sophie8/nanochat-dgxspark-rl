@@ -35,6 +35,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from nanochat.hf_tokenizer_wrapper import HFTokenizerWrapper
 from nanochat.hf_model_wrapper import HFModelWrapper
 from tasks.search_r1 import SearchR1Task
+from scripts.search_r1_grpo import prepare_prompt  # Import prepare_prompt from search_r1_grpo
 
 
 def parse_args():
@@ -107,9 +108,10 @@ def main():
 	@torch.no_grad()
 	def generate_multiturn_text(prompt: str) -> str:
 		"""Generate text with multi-turn search capability (like Search-R1)."""
-		# Prepare prompt tokens
-		bos_id = tokenizer.get_bos_token_id()
-		prompt_ids = tokenizer.encode(prompt, prepend=bos_id)
+		# Prepare prompt tokens using the imported prepare_prompt function from search_r1_grpo
+		# prepare_prompt expects an item dict with "messages" key
+		item = {"messages": [{"role": "user", "content": prompt}]}
+		prompt_ids = prepare_prompt(item)
 		
 		# Constants from search_r1_grpo.py
 		MAX_SEARCH_TURNS = args.max_search_turns

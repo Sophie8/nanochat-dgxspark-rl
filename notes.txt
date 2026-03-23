@@ -1,0 +1,40 @@
+uvx hf download Qwen/Qwen3-8B --local-dir /home/Documents/models
+https://github.com/databrickslabs/dolly/issues/118: use full path for model, not ~ at the begining
+https://forums.developer.nvidia.com/t/effective-pytorch-and-cuda/348230/3
+use container for torch: https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch?version=25.09-py3
+
+You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Use `pip install ddgs` instead.
+tmux
+tmux ls
+docker run --gpus all -it --rm nvcr.io/nvidia/pytorch:xx.xx-py3
+(if gpu become not avaliable, restart the container)
+docker restart id
+docker start -ai <container_name_or_id>
+best practice use mount: docker run --name=my-app-container -d -v app-data:/var/lib/app my-app-image
+python scripts/eval.py \
+    --model-path /workspace/nanochat-dgxspark-rl/outputs/search_r1/final \
+    --max-new-tokens 2048 \
+    --temperature 0.7 \
+    --max-search-turns 5 \
+    --search-engine duckduckgo
+
+experiment notes:
+Step 326/996 | Epoch 0 | reward: 0.7088 | lrm: 0.747 | grad: 14505065557524480.000 | dt: 621.36s
+The log confirms that at Step 326, your grad_norm hit a staggering 1.45e16. In deep learning, a gradient this high is essentially an "exploding gradient" event.
+Because this is a Search-R1 model using GRPO, this specific spike usually points to one of three technical failures:
+1. The "Negative Advantage" Trap
+In GRPO, the advantage is calculated by subtracting the mean reward of the group from each individual reward: 
+The Problem: If one specific completion in the group gets an extremely low reward compared to the others, or if the KL divergence term suddenly spikes, the loss function can produce a mathematically massive gradient.
+Check: Look at the specific group of completions generated at Step 326. Was there one outlier that failed the "search" or "reasoning" format entirely?
+2. KL Divergence Instability
+GRPO relies heavily on a KL penalty to keep the trained model from drifting too far from the reference model.
+The Problem: If the model generates a very long sequence (common in R1 "thinking" blocks) that the reference model finds highly improbable, the log-probability ratio can explode.
+Check: Does Step 326 have an unusually high token count or a very long "thought" process?
+3. Numerical Precision (FP16 vs. BF16)
+The Problem is dangerously close to the maximum value representable in FP16 (approx). If you are training in FP16, this almost certainly caused an Inf or NaN in the weights, even if the graph looks like it recovered.
+Check: Ensure you are using BF16 (Brain Floating Point), which handles these high-dynamic-range spikes much more gracefully without overflowing.
+Recommended Immediate Actions
+Lower the Gradient Clip: Your current clipping is clearly not catching this. Explicitly set max_grad_norm: 1.0 or even 0.5 in your training config.
+Inspect the Samples: Print the specific prompts and completions for Step 326. Look for infinite loops in the "thinking" phase or extremely long outputs that might have triggered a reward penalty.
+Check for NaNs: Run a quick check on your model weights now. If model.parameters() contains any NaN values, the training after Step 326 is "dead" (doing nothing), and you must restart from a checkpoint prior to that step.
